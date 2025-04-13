@@ -1,12 +1,14 @@
-
+let tanlov = ''
+let currentT = ''
 let winner = false
 for(let section of sections.children){
     let index;
     section.addEventListener('click',(event) =>{
-        
+        console.log(res.includes(0))
         let index = parseInt(section.getAttribute('data-cell-index'))
-        if(sum>=9 || winner){
-            return
+        if( winner){
+            h2.innerHTML = winner
+            return 
         }
         
         if(res[index]== 0){
@@ -14,62 +16,103 @@ for(let section of sections.children){
             user_res+=`${index+1}`
             user_res = user_res.split('').sort().join('')
             section.innerHTML = user
-
-
-            if(res_index.length>0){
-
-                res_index.splice(res_index.indexOf(index),1)
-                index = res_index[Math.floor(Math.random() * res_index.length)]
-                sum++
-                winner = testWin()
-
-                if(typeof winner == 'string'){
-                    h2.innerHTML = `Winner ${winner}`
-                    return
-                }
-                compSeleter(index)
-                winner = testWin()
-                if(typeof winner == 'string'){
-                    h2.innerHTML = `Winner ${winner}`
-                    return
-                }
+            sum++
+            winner = testWin()
+            if(winner){
+                h2.innerHTML = winner
+                return
+            }
+            compSeleter()
+            if(winner){
+                h2.innerHTML = winner
             }
         }else{
             alert('Tanlangan')
         }
-        console.log(res);
-        if(sum>=9){
-            if(typeof winner == 'string'){
-                h2.innerHTML = `Winner ${winner}`
-                return
-            }else{
-                h2.innerHTML = 'DRAAW !'
-            }
-            return
+        if(!res.includes(0)){
+            h2.innerHTML = (winner) ? winner : 'Draw'
         }
+
     })
 }
-function compSeleter(index) {
+function compSeleter() {
+    let oldTanlov = tanlov
+    let bloklandi = false
 
+    for (let str of test) {
+        let count = 0
+        let emptyCell = -1
 
-    // for(let chars of test){
-    //     let end_num = parseInt(chars.at(-1))
-    //     if(comp_res.includes(chars.slice(0,2)) && res[end_num-1] == 0){
-    //          index = end_num-1               
-    //     }
-    //     if(user_res.includes(chars.slice(0,2)) && res[end_num-1] == 0){
-    //          index = end_num-1               
-    //     }
-    // }
-    // console.log(index,res_index);
-    
-    if(index < 9){
-        sum++
-        res_index.splice(res_index.indexOf(index),1)
-            sections.children[index].innerHTML = comp
-            res[index]+=1
-            comp_res+=`${index+1}`
+        for (let ch of str) {
+            if (user_res.includes(ch)) {
+                count++
+            } else if (!comp_res.includes(ch)) {
+                emptyCell = parseInt(ch) - 1
+            }
+        }
+
+        if (count === 2 && res[emptyCell] === 0) {
+            res[emptyCell] = 1
+            comp_res += `${emptyCell + 1}`
             comp_res = comp_res.split('').sort().join('')
+            sections.children[emptyCell].innerHTML = comp
+            sum++
+            winner = testWin()
+            if (winner) h2.innerHTML = `Winner: ${winner}`
+            return
+        }
+    }
+
+    if (oldTanlov && !oldTanlov.split('').some(ch => user_res.includes(ch))) {
+        for (let ch of oldTanlov) {
+            let idx = parseInt(ch) - 1
+            if (res[idx] === 0) {
+                res[idx] = 1
+                comp_res += `${idx + 1}`
+                comp_res = comp_res.split('').sort().join('')
+                sections.children[idx].innerHTML = comp
+                sum++
+                winner = testWin()
+                if (winner) h2.innerHTML = `Winner: ${winner}`
+                return
+            }
+        }
+    }
+
+    let foundLine = false
+    for (let str of test) {
+        if (!str.split('').some(ch => user_res.includes(ch))) {
+            for (let ch of str) {
+                let idx = parseInt(ch) - 1
+                if (res[idx] === 0) {
+                    tanlov = str
+                    res[idx] = 1
+                    comp_res += `${idx + 1}`
+                    comp_res = comp_res.split('').sort().join('')
+                    sections.children[idx].innerHTML = comp
+                    sum++
+                    foundLine = true
+                    winner = testWin()
+                    if (winner) h2.innerHTML = `Winner: ${winner}`
+                    return
+                }
+            }
+        }
+    }
+
+    if (!foundLine) {
+        for (let i = 0; i < 9; i++) {
+            if (res[i] === 0) {
+                res[i] = 1
+                comp_res += `${i + 1}`
+                comp_res = comp_res.split('').sort().join('')
+                sections.children[i].innerHTML = comp
+                sum++
+                winner = testWin()
+                if (winner) h2.innerHTML = `Winner: ${winner}`
+                return
+            }
+        }
     }
 }
 
